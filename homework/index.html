@@ -1,43 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" href="./hyf.png" />
+    <link rel="shortcut icon" type="image/png" href="./hyf.png" />
+    <link rel="stylesheet" href = "https://bootswatch.com/4/litera/bootstrap.min.css">
+    <title>HYF-GITHUB</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" />
+   
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="format-detection" content="telephone=no">
-  <link rel="apple-touch-icon" href="./hyf.png">
-  <link rel="shortcut icon" type="image/png" href="./hyf.png" />
-  <title>HYF-GITHUB</title>
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
-  <link rel="stylesheet" href="./style.css">
-</head>
-
-<body>
-  <div id="root"></div><header><p>HYF Repository</p></header>
+  <body>
+    <nav class="navbar">
+        <div id="container">
+            <h1>HYF Repository</h1>
+          </div>
+    </nav>
+   
+    <div id="root">
       <select id="select"> </select>
-    </div>
-    <div id="container">
-      <div id="left-div"><table id="left-table"></table></div>
-      <div id="right-div"><table id="right-table"></table></div>
-    </div>
-    <script>
-      const xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          const data = JSON.parse(this.responseText);
-          const select = document.getElementById('select');
-          select.innerHTML = data
-            .map((opt, i) => `<option value="${i}">${data[i].name}</option>`)
-            .join('');
+      <div id="left-div"></div>
+       <table>
+         <tbody>
+           <tr>
+              <td id= 'Repository'> </td>
+            </tr>  
+              <td id= 'Description'></td>
+            </tr>
+              <td id= 'Forks'></td>
+            </tr>
+              <td id= 'Updated'></td>
+           </tr>
+         </tbody>
+       </table>
+         
+      <div id="right-div">
+        
+      </div>
 
-          xhttp.open('GET', 'https://api.github.com/orgs/HackYourFuture/repos?per_page=100', true);
-          xhttp.send();
-        }
-      };
+    </div>
+    <script>      
+     const xhttp = new XMLHttpRequest();
+     xhttp.open('GET', 'https://api.github.com/orgs/HackYourFuture/repos?per_page=100', true);
+     xhttp.onload = function() {
+        if (this.readyState === 4 && this.status === 200) {
+    const data = JSON.parse(this.responseText);
+    const select = document.getElementById('select');
+    select.innerHTML += data
+    .sort(function (a, b) {
+     return a.name.localeCompare(b.name);
+   })
+    .map((opt, i) => `<option value="${i}">${data[i].name}</option>`)
+      .join(" ");
+      select.addEventListener('change', function repo() {
+        const i = this.value;
+
+   document.getElementById('Repository').innerHTML = `Repository: <a href = "https://github.com/HackYourFuture/${data[i].name}" target= "_blank">${data[i].name}</a>`
+   document.getElementById('Description').innerHTML = `Description:  <span>${data[i].description}</span>`;
+   document.getElementById('Forks').innerHTML =  `Forks: <span>${data[i].forks}`;
+   document.getElementById('Updated').innerHTML = `Updated: <span>${data[i].updated_at}`;
+      })
+  }
+}
+xhttp.send();
+const rightDiv = document.getElementById('right-div');
+    const contHeader = document.createElement('p');
+    contHeader.innerHTML = "Contributors";
+    const contList = document.createElement('ul');
+    rightDiv.appendChild(contHeader);
+    rightDiv.appendChild(contList);
+    const url = 'https://api.github.com/orgs/HackYourFuture/repos?per_page=100';
+const contributor = (c) => {
+  fetch(url)
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(rec => {
+      fetch(rec.contributors_url)
+      .then(response => response.json())
+      .then(data => { 
+        data.forEach(rec => { 
+      let img = document.createElement('img');
+      img.src = rec.avatar_url;
+      img.height = "48";
+      let div =document.createElement('div')
+      let logIn = rec.login;
+      div.innerHTML += logIn;
+      let link = "https://github.com/" +  logIn;
+      let aLink = "<a href ='"+link+"'> " +logIn + "</a>";
+      let span = document.createElement('span');
+      span.innerHTML += rec.contributions;
+      const li = document.createElement('li');
+      contList.appendChild(li);
+      li.appendChild(img);
+      li.appendChild(span);
+      li.appendChild(div);
+      div.appendChild(span);
+      li.innerHTML += img + aLink + span;
+    })
+  })
+  })
+})
+      .catch(function(error) {
+        console.log(JSON.stringify(error));
+      })
+ 
+
+}
+contributor(url);
+
     </script>
-</body>
-
+  </body>
 </html>
+
